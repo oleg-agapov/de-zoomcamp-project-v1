@@ -1,1 +1,2 @@
 pandas
+prefect-gcp[cloud_storage]

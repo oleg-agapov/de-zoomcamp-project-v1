@@ -2,7 +2,6 @@ import argparse
 import requests
 import pandas as pd
 from io import BytesIO
-from pathlib import Path
 from prefect import flow, task
 from prefect_gcp.cloud_storage import GcsBucket
 
