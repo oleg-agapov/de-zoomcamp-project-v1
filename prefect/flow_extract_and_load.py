@@ -46,10 +46,6 @@ def get_raw_and_save(date: str) -> None:
         content = extract_from_web(url)
         save_to_cloud_storage(content, target_full_path)
 
-        import gc
-        del content
-        gc.collect()
-
 
 @flow(name='Main EL process')
 def extract_and_load(
@@ -63,8 +59,13 @@ def extract_and_load(
     if end_date:
         dates_range = [str(x)[:10] for x in pd.date_range(start=start_date, end=end_date)]
     
-    for date in dates_range:
-        get_raw_and_save(date=date)
+    import concurrent.futures
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+        executor.map(get_raw_and_save, dates_range)
+
+    # for date in dates_range:
+    #     get_raw_and_save(date=date)
 
 
 if __name__ == '__main__':
