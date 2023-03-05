@@ -15,13 +15,14 @@ def extract_from_web(url: str) -> bytes:
     return r.content
 
 
-@task()
+@task(timeout_seconds=60, retries=3)
 def save_to_cloud_storage(content: bytes, storage_path: str) -> None:
     """
     Task saves given bytes content to the Cloud Storage
     """
     gcs = GcsBucket.load('de-zoomcamp-project')
     gcs.upload_from_file_object(BytesIO(content), storage_path)
+    gcs.close()
 
 
 @flow(name='Get raw data from Github archive')
@@ -61,9 +62,10 @@ def extract_and_load(
     """
     dates_range = [start_date]
     if end_date:
-        dates_range = pd.date_range(start=start_date, end=end_date)
+        dates_range = [str(x)[:10] for x in pd.date_range(start=start_date, end=end_date)]
+    
     for date in dates_range:
-        get_raw_and_save(date=str(date)[:10])
+        get_raw_and_save(date=date)
 
 
 if __name__ == '__main__':
