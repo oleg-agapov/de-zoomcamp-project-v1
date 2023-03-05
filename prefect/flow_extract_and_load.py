@@ -22,7 +22,6 @@ def save_to_cloud_storage(content: bytes, storage_path: str) -> None:
     """
     gcs = GcsBucket.load('de-zoomcamp-project')
     gcs.upload_from_file_object(BytesIO(content), storage_path)
-    gcs.close()
 
 
 @flow(name='Get raw data from Github archive')
