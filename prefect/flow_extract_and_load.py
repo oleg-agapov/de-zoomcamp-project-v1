@@ -6,7 +6,7 @@ from prefect import flow, task
 from prefect_gcp.cloud_storage import GcsBucket
 
 
-@task()
+@task(timeout_seconds=300, retries=3)
 def extract_from_web(url: str) -> bytes:
     """
     Task that downloads the file in bytes format from a given URL
