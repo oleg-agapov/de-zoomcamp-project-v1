@@ -48,7 +48,7 @@ def get_raw_and_save(date: str) -> None:
         save_to_cloud_storage(content, target_full_path)
 
         import gc
-        del(content)
+        del content
         gc.collect()
 
 
