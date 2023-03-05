@@ -45,7 +45,10 @@ def get_raw_and_save(date: str) -> None:
         # main flow
         content = extract_from_web(url)
         save_to_cloud_storage(content, target_full_path)
+
+        import gc
         del(content)
+        gc.collect()
 
 
 @flow(name='Main EL process')
