@@ -13,7 +13,7 @@ def get_latest_date() -> str:
     folders = sorted([x for x in folders if x.startswith('github_raw_data/')])
     
     last_day = datetime.datetime.strptime(folders[-1][-10:], '%Y/%m/%d')
-    now = datetime.datetime.now()
+    now = datetime.datetime.utcnow()
 
     if last_day.date() < now.date():
         new_date = last_day + datetime.timedelta(days=1)
@@ -48,8 +48,14 @@ def get_raw_and_save(date: str) -> None:
     Keyword arguments:
     - date: the date in a string format "YYYY-DD-MM"
     """
+    now = datetime.datetime.utcnow()
+    now_date = now.date().strftime('%Y-%m-%d')
+    now_hour = now.hour
 
     for hour in range(24):
+        if date == now_date:
+            if hour >= now_hour:
+                continue
         # parameters
         file_name = f'{date}-{hour}.json.gz'
         year, month, day = date.split('-')
