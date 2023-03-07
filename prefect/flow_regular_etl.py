@@ -1,6 +1,7 @@
+import argparse
 import requests
-from io import BytesIO
 import datetime
+from io import BytesIO
 
 from prefect import flow, task
 from prefect_gcp.cloud_storage import GcsBucket
@@ -13,7 +14,7 @@ def get_latest_date() -> str:
     folders = sorted([x for x in folders if x.startswith('github_raw_data/')])
     
     last_day = datetime.datetime.strptime(folders[-1][-10:], '%Y/%m/%d')
-    now = datetime.datetime.utcnow()
+    now = datetime.datetime.utcnow() - datetime.timedelta(hours=1)
 
     if last_day.date() < now.date():
         new_date = last_day + datetime.timedelta(days=1)
@@ -70,10 +71,19 @@ def get_raw_and_save(date: str) -> None:
 
 
 @flow(name='Main periodic EL process')
-def extract_and_load() -> None:
-    date = get_latest_date()
+def extract_and_load(start_date: str) -> None:
+    if start_date:
+        date = start_date
+    else:
+        date = get_latest_date()
     get_raw_and_save(date=date)
 
 
 if __name__ == '__main__':
-    extract_and_load()
+    parser = argparse.ArgumentParser(description='Ingest Github Archive data')
+
+    parser.add_argument('--start_date', required=False, help='Target date for processing')
+
+    args = parser.parse_args()
+
+    extract_and_load(args.start_date)
