@@ -1,9 +1,26 @@
 import argparse
 import requests
-import pandas as pd
+import datetime
 from io import BytesIO
+
 from prefect import flow, task
 from prefect_gcp.cloud_storage import GcsBucket
+
+
+@task()
+def get_latest_date() -> str:
+    gcs = GcsBucket.load('de-zoomcamp-project')
+    folders = gcs.list_folders()
+    folders = sorted([x for x in folders if x.startswith('github_raw_data/')])
+    
+    last_day = datetime.datetime.strptime(folders[-1][-10:], '%Y/%m/%d')
+    now = datetime.datetime.utcnow() - datetime.timedelta(hours=1)
+
+    if last_day.date() < now.date():
+        new_date = last_day + datetime.timedelta(days=1)
+        return new_date.strftime('%Y-%m-%d')
+    else:
+        return now.strftime('%Y-%m-%d')
 
 
 @task(timeout_seconds=60, retries=3)
@@ -27,13 +44,19 @@ def save_to_cloud_storage(content: bytes, storage_path: str) -> None:
 @flow(name='Get raw data from Github archive')
 def get_raw_and_save(date: str) -> None:
     """
-    A complete Flow that can download a single date of Github Archive and save it to the target location.
+    Flow that can download a single date of Github Archive and save it to the target location.
     
     Keyword arguments:
     - date: the date in a string format "YYYY-DD-MM"
     """
+    now = datetime.datetime.utcnow()
+    now_date = now.date().strftime('%Y-%m-%d')
+    now_hour = now.hour
 
     for hour in range(24):
+        if date == now_date:
+            if hour >= now_hour:
+                continue
         # parameters
         file_name = f'{date}-{hour}.json.gz'
         year, month, day = date.split('-')
@@ -47,31 +70,18 @@ def get_raw_and_save(date: str) -> None:
         save_to_cloud_storage(content, target_full_path)
 
 
-@flow(name='Main EL process')
-def extract_and_load(
-        start_date: str,  
-        end_date: str = None
-    ) -> None:
-    """
-    Main Extract-Load Flow for Github Data.
-    """
-    dates_range = [start_date]
-    if end_date:
-        dates_range = [str(x)[:10] for x in pd.date_range(start=start_date, end=end_date)]
-    
-    for date in dates_range:
-        get_raw_and_save(date=date)
+@flow(name='Main EL')
+def extract_and_load(target_date: str = None) -> None:
+    if target_date:
+        date = target_date
+    else:
+        date = get_latest_date()
+    get_raw_and_save(date=date)
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Ingest Github Archive data')
-
-    parser.add_argument('--start_date', help='Target date for processing')
-    parser.add_argument('--end_date', required=False, help='End date (to upload a range of dates)')
-
+    parser.add_argument('--target_date', required=False, help='Target date for processing')
     args = parser.parse_args()
-    
-    extract_and_load(
-        start_date=args.start_date,
-        end_date=args.end_date,
-    )
+
+    extract_and_load(args.target_date)
