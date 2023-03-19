@@ -35,6 +35,29 @@ resource "google_storage_bucket" "data_lake" {
   force_destroy = true
 }
 
+resource "google_storage_bucket" "dataproc" {
+  name     = "dataproc-de-zoomcamp-2023"
+  location = var.gcp_region
+
+  storage_class               = "STANDARD"
+  uniform_bucket_level_access = true
+
+  versioning {
+    enabled = true
+  }
+
+  lifecycle_rule {
+    action {
+      type = "Delete"
+    }
+    condition {
+      age = 30 # days
+    }
+  }
+
+  force_destroy = true
+}
+
 resource "google_bigquery_dataset" "bigquery_dataset" {
   dataset_id = var.bigquery_dataset
   project    = var.gcp_project_id
