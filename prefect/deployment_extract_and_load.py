@@ -8,7 +8,7 @@ github_block = GitHub.load('de-zoomcamp-project')
 
 deployment = Deployment.build_from_flow(
     flow=extract_and_load,
-    name='Load raw data to GCS',
+    name='Load raw data',
     storage=github_block,
 )
 

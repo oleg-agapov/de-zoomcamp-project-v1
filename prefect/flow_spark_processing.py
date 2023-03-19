@@ -73,7 +73,7 @@ def process_raw_data(
     print(result)
 
 
-@flow(name='Main flow')
+@flow(name='Process data with Spark')
 def main_flow(
         project_id: str,
         region: str,

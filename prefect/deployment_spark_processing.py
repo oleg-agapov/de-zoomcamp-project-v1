@@ -9,7 +9,7 @@ github_block = GitHub.load('de-zoomcamp-project')
 
 deployment = Deployment.build_from_flow(
     flow=main_flow,
-    name='Process raw data with Spark',
+    name='Process raw data',
     storage=github_block,
     parameters={
         'project_id': 'de-zoomcamp-2023-project',

@@ -70,7 +70,7 @@ def get_raw_and_save(date: str) -> None:
         save_to_cloud_storage(content, target_full_path)
 
 
-@flow(name='Main EL')
+@flow(name='Load raw data to GCS')
 def extract_and_load(target_date: str = None) -> None:
     if target_date:
         date = target_date
