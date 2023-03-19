@@ -2,12 +2,14 @@ import argparse
 import datetime
 
 from prefect import flow, task
-from prefect_gcp import GcsBucket
+from prefect_gcp import GcsBucket, GcpCredentials
 from google.cloud import dataproc_v1 as dataproc
 
 
 def submit_job(project_id, region, cluster_name, python_file, target_date):
+    gcp = GcpCredentials.load('de-zoomcamp-project')
     job_client = dataproc.JobControllerClient(
+        credentials=gcp.get_credentials_from_service_account(),
         client_options={"api_endpoint": "{}-dataproc.googleapis.com:443".format(region)}
     )
     current_timestamp = round(datetime.datetime.now().timestamp())

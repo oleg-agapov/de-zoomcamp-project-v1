@@ -12,9 +12,9 @@ deployment = Deployment.build_from_flow(
     name='Process raw data with Spark',
     storage=github_block,
     parameters={
-        'project_id': os.getenv('GCP_PROJECT_ID'),
-        'region': os.getenv('GCP_REGION'),
-        'cluster_name': 'dataproc2',
+        'project_id': 'de-zoomcamp-2023-project',
+        'region': 'europe-west6',
+        'cluster': 'dataproc2',
         'python_file': 'gs://dataproc-de-zoomcamp-2023/notebooks/jupyter/process_github.py',
     }
 )
