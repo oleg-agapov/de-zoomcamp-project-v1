@@ -8,10 +8,6 @@ from google.cloud import dataproc_v1 as dataproc
 
 def submit_job(project_id, region, cluster_name, python_file, target_date):
     gcp = GcpCredentials.load('de-zoomcamp-project')
-    
-    #import os
-    #os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/opt/prefect/google.json"
-
     job_client = dataproc.JobControllerClient(
         credentials=gcp.get_credentials_from_service_account(),
         client_options={"api_endpoint": "{}-dataproc.googleapis.com:443".format(region)}
@@ -45,12 +41,7 @@ def get_latest_date() -> str:
     folders = gcs.list_folders()
     folders = sorted([x for x in folders if x.startswith('github_processed_data/')])
     
-    #last_day = datetime.datetime.strptime(folders[-1][-10:], '%Y/%m/%d')
-    last_day = datetime.datetime(
-        year=int(folders[-1].split('/')[1].split('=')[1]),
-        month=int(folders[-1].split('/')[2].split('=')[1]),
-        day=int(folders[-1].split('/')[3].split('=')[1]),
-    )
+    last_day = datetime.datetime.strptime(folders[-1][-10:], '%Y-%m-%d')
     now = datetime.datetime.utcnow() - datetime.timedelta(hours=1)
 
     if last_day.date() < now.date():
