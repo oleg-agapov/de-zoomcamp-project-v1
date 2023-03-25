@@ -6,6 +6,7 @@
 {{
     config(
         materialized = "incremental",
+        incremental_strategy = 'insert_overwrite',
         partition_by = {
             "field": "created_at",
             "data_type": "timestamp",
@@ -51,9 +52,7 @@ select
 from
 {{ source('raw_data', 'github') }}
 
-{% if var('from', None) and var('to', None) %}
-where timestamp(`date`) between '{{ var("from") }}' AND '{{ var("to") }}'
-{% elif is_incremental() %}
+{% if is_incremental() %}
 -- recalculate yesterday + today
 where timestamp(`date`) in ({{ partitions_to_replace | join(',') }})
 {% endif %}
