@@ -1,0 +1,14 @@
+dbt_github:
+  target: dev
+  outputs:
+    dev:
+      type: bigquery
+      method: service-account
+      priority: interactive
+      keyfile: "{{ env_var('GCP_SERVICE_ACCOUNT_PATH') }}"
+      project: "{{ env_var('GCP_PROJECT_ID') }}"
+      dataset: dev
+      location: "{{ env_var('GCP_REGION') }}"
+      threads: 1
+      job_retries: 1
+      job_execution_timeout_seconds: 300
